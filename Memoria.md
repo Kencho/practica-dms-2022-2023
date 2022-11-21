@@ -81,6 +81,19 @@ Por si además se desea crear una nueva respuesta, se ha implementado un botón 
 #### 1.6 Respuesta (Votaciones)
 Para llevar a cabo las votaciones de las preguntas y las respuestas se han creado dos macros correspondientes con los botones para votos positivos y para votos negativos. Dichas macros se encuentran en el fichero "buttons.html", obteniendo cada una de ellas características especiales como el color de fondo (verde en caso de voto positivo y rojo en caso de voto negativo) y el texto que contiene (vote Up en caso de voto positivo y vote Down en caso de voto negativo), tambien se realiza una llamada en cada caso al método correspondiente cuando es pulsado (voteUp() en caso de voto positivo y voteDown() en caso de voto negativo). Los metodos a los que se llaman cuando se pulsa el boton se encuentran en el fichero votos.py, en el que se ha creado la clase Voto con cuatro metodos posibles: El primero "voteUp" hará que se sume un punto positivo a los votos de la pregunta/respuesta. El segundo "unvoteUp" se llamará en caso de querer anular el punto positivo de la pregunta/respuesta en caso de haber sumado previamente dicho punto. El tercero "voteDown" hara que se sume un punto negativo a los votos de la pregunta/respuesta. Por ultimo, el cuarto "unvoteDown" se llamará en caso de querer anular el punto negativo de la pregunta/respuesta en caso de haber sumado previamente dicho punto. Adicionalmente, se ha creado un Endpoint para actualizar las votaciones de las preguntas/respuestas, quedando tambien reflejado en el frontend.
 
+
+#### 1.8 Creaccion de preguntas
+
+El usuario tendra la opcion de poder crear preguntas, para ello se ha creado un template (el cual extiende de "base.html") llamado crear_preguntas.html.
+En este archivo encontramos los siguientes componentes:
+  - Un import de la macro de los botones, en el cual agregamos "submit_button" y "reset_button", este ultimo se ha creado para poder vaciar los campos del formulario al crear la pregunta.
+  - Un formulario con sus respectivos labels (Titulo de la pregunta y Detalles de la pregunta), inputs ("titulo" de tipo text, "detalles" de tipo textarea) y buttons (Enviar Pregunta y Vaciar Campos).
+    - El boton "Enviar Pregunta" es de tipo "submit_button", su funcion sera gruardar: el nombre del usuario que ha realizado la pregunta, la fecha cuando se ha realizado la pregunta, el titulo de la pregunta y el detalle/descripcion de la pregunta.
+    - El boton "Vaciar Campos" es de tipo "reset_button", su función es resetear (vaciar) los campos del formulario.
+Para acceder a la creaccion de preguntas se hace desde "/crear_preguntas".
+
+
+
 ### 2. Consideraciones de para el desarrollo
 #### 2.1 Docker
 Por su simplicidad se han decidido modificar los ficheros de instalacion e inicio y asi permitir el desarrollo sin necesiadad de reinicios.
@@ -103,6 +116,4 @@ app.config.update(
 ```
 Esto permite la recarga automatica de templates y codigo de las peticiones del mismo archivo. 
 Es recomendable eliminar estas lineas en un futuro despliegue.
-
-
 
