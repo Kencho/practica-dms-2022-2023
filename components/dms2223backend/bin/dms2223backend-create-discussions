@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+from dms2223common.data import Role
+from sqlalchemy.orm.session import Session
+from dms2223backend.data.config import BackendConfiguration
+from dms2223backend.data.db.resultsets import Discussions, Answers, Comments, Reports
+from dms2223backend.data.db import Schema
+
+
+cfg: BackendConfiguration = BackendConfiguration()
+cfg.load_from_file(cfg.default_config_file())
+db: Schema = Schema(cfg)
+
+session: Session = db.new_session()
+Discussions.create(session, "Título discusión 1", "Contenido de la discusión 1")
+Discussions.create(session, "Título discusión 2", "Contenido de la discusión 2")
+Discussions.create(session,"Titulo discusion 3", "Contenido de la discusion 3")
+
+Answers.answer(session, 1, "Respuesta 1 a discusion 1")
+Answers.answer(session, 1, "Respuesta 2 a discusion 1")
+Answers.answer(session, 2, "Respuesta 1 a discusion 2")
+
+Comments.comment(session, 1, 1, "Comentario 1 a respuesta 1")
+Comments.comment(session, 1, 1, "Comentario 2 a respuesta 1")
+Comments.comment(session, 1, 2, "Comentario 1 a respuesta 2")
+Comments.comment(session, 2, 3, "Comentario 1 a discusion 2 respuesta 1")
+
+Reports.create(session,1, "Este es un reporte a un titulo")
+Reports.create_answer_report(session,1, "Este es un reporte a una respuesta")
+Reports.create_comment_report(session,1,"reporte a comentario 1")
+
+db.remove_session()

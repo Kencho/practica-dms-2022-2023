@@ -1,0 +1,27 @@
+{% extends "moderator.html" %}
+{% from "macros/buttons.html" import button, submit_button %}
+{% block contentsubheading %}Vista del moderador{% endblock %}
+{% block moderatorcontent %}
+    <form action="/moderator/moderator/resolution" method="post">  <!--Para  almacenar la resoucion en el futuro-->
+        <input type="hidden" name="redirect_to" value="{{ redirect_to }}" />
+        <dl>
+            
+            <dt><h3>{{ report }}</h3></dt>
+            
+		<dt><p><h2>Resultado del reporte</h2></p></dt>       
+            <dd>
+                <textarea name="content" rows="15" cols="100">Descripción sobre la resolución del reporte...</textarea>
+            </dd>
+            
+        <dt><p>Moderador:<textarea name="content" rows="1" cols="15"></textarea></p></dt>
+            
+        </dl>
+        <p class="alignright">{{ button('bluebg', '/moderator/reports?reporttitle=' + title + '&redirect_to=/moderator/moderator/resolution?reporttitle=' + title, 'Enviar resultado reporte') }}
+                             {{ button('redbg', '/moderator/reports?reporttitle=' + title + '&redirect_to=/moderator/moderator/resolution?reporttitle=' + title, 'Cancelar') }}</p>
+
+    </form>
+{% endblock %}
+
+
+
+

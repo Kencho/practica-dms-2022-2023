@@ -6,7 +6,8 @@ import os
 from typing import Dict
 import dms2223frontend
 from dms2223frontend.data.config import FrontendConfiguration
-from dms2223frontend.data.rest import AuthService, BackendService
+from dms2223frontend.data.rest import AuthService
+from dms2223frontend.data.rest.backendservice import BackendService
 from dms2223frontend.presentation.web import \
     AdminEndpoints, CommonEndpoints, SessionEndpoints, DiscussionEndpoints, ModeratorEndpoints
 
@@ -53,11 +54,116 @@ def get_home():
 
 @app.route("/discussion", methods=['GET'])
 def get_discussion():
-    return DiscussionEndpoints.get_discussion(auth_service)
+    return DiscussionEndpoints.get_discussion(auth_service, backend_service)
+
+@app.route("/discussion/discussions", methods=['GET'])
+def get_discussion_discussions():
+    return DiscussionEndpoints.get_discussion_discussions(auth_service, backend_service)
+
+@app.route("/discussion/discussions/new", methods=['GET'])
+def get_discussion_discussions_new():
+    return DiscussionEndpoints.get_discussion_discussions_new(auth_service, backend_service)
+
+@app.route("/discussion/discussions/new", methods=['POST'])
+def post_discussion_discussions_new():
+    return DiscussionEndpoints.post_discussion_discussions_new(auth_service, backend_service)
+
+@app.route("/discussion/discussions/report", methods=['GET'])
+def get_discussion_discussions_report():
+    return DiscussionEndpoints.get_discussion_discussions_report(auth_service, backend_service)
+
+@app.route("/discussion/discussions/report", methods=['POST'])
+def post_discussion_discussions_report():
+    return DiscussionEndpoints.post_discussion_discussions_report(auth_service, backend_service)
+
+@app.route("/discussion/discussions/reportanswer", methods=['POST'])
+def post_discussion_discussions_reportanswer():
+    return DiscussionEndpoints.post_discussion_discussions_reportanswer(auth_service, backend_service)
+
+@app.route("/discussion/discussions/reportanswer", methods=['GET'])
+def get_discussion_discussions_reportanswer():
+    return DiscussionEndpoints.get_discussion_discussions_reportanswer(auth_service, backend_service)
+
+@app.route("/discussion/discussions/reportcomment", methods=['GET'])
+def get_discussion_discussions_reportcomment():
+    return DiscussionEndpoints.get_discussion_discussions_reportcomment(auth_service, backend_service)
+
+@app.route("/discussion/discussions/reportcomment", methods=['POST'])
+def post_discussion_discussions_reportcomment():
+    return DiscussionEndpoints.post_discussion_discussions_reportcomment(auth_service, backend_service)
+
+#
+@app.route("/accept_report", methods =['POST'])
+def post_accept_report():
+    return ModeratorEndpoints.put_accept_report(auth_service, backend_service)
+
+
+
+#
+
+@app.route("/discussion/discussions/view", methods=['GET'])
+def get_discussion_discussions_view():
+    return DiscussionEndpoints.get_discussion_discussions_view(auth_service, backend_service)
+
+@app.route("/discussion/discussions/view", methods=['POST'])
+def post_discussion_discussions_view():
+    return DiscussionEndpoints.post_discussion_discussions_view(auth_service, backend_service)
+
+@app.route("/discussion/discussions/answer", methods=['GET'])
+def get_discussion_discussions_answer():
+    return DiscussionEndpoints.get_discussion_discussions_answer(auth_service, backend_service)
+
+@app.route("/discussion/discussions/answer", methods=['POST'])
+def post_discussion_discussions_answer():
+    return DiscussionEndpoints.post_discussion_discussions_answer(auth_service, backend_service)
+
+@app.route("/discussion/discussions/comment", methods=['GET'])
+def get_discussion_discussions_comment():
+    return DiscussionEndpoints.get_discussion_discussions_comment(auth_service, backend_service)
+
+@app.route("/discussion/discussions/comment", methods=['POST'])
+def post_discussion_discussions_comment():
+    return DiscussionEndpoints.post_discussion_discussions_comment(auth_service, backend_service)
+
+@app.route("/discussion/discussions/vote_answer", methods=['POST'])
+def post_vote_answer():
+    return DiscussionEndpoints.post_vote_answer(auth_service, backend_service)
+
+@app.route("/discussion/discussions/vote_comment", methods=['POST'])
+def post_vote_comment():
+    return DiscussionEndpoints.post_vote_comment(auth_service, backend_service)
+
 
 @app.route("/moderator", methods=['GET'])
 def get_moderator():
     return ModeratorEndpoints.get_moderator(auth_service)
+
+@app.route("/moderator/reports", methods=['GET'])
+def get_moderator_reports():
+    return ModeratorEndpoints.get_moderator_reports(auth_service,backend_service)
+
+@app.route("/moderator/moderator/view", methods=['GET'])
+def get_report_view():
+    return ModeratorEndpoints.get_report_view(auth_service,backend_service)
+
+@app.route("/moderator/moderator/resolution", methods=['GET'])
+def get_moderator_resolution_report():
+    return ModeratorEndpoints.get_moderator_resolution_report(auth_service)
+
+@app.route("/moderator/discussions", methods=['GET'])
+def get_moderator_discussions():
+    return ModeratorEndpoints.get_moderator_discussions(auth_service,backend_service)
+
+@app.route("/moderator/discussions/view", methods=['GET'])
+def get_moderator_discussions_view():
+    return ModeratorEndpoints.get_moderator_discussions_view(auth_service, backend_service)
+
+@app.route("/moderator/moderator/view", methods=['GET'])
+def get_moderator_moderator_view():
+    return ModeratorEndpoints.get_moderator_moderator_view(auth_service)
+
+
+
 
 @app.route("/admin", methods=['GET'])
 def get_admin():

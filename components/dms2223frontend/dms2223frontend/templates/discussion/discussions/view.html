@@ -1,0 +1,75 @@
+{% extends "discussion.html" %}
+{% from "macros/buttons.html" import button, submit_button %}
+{% block contentsubheading %}Vista de discusión{% endblock %}
+{% block discussioncontent %}
+
+
+    
+    <dl>
+        <h3><dt>{{ discussion['title'] }}</dt></h3>
+        <textarea name="content" rows="10" cols="100"> {{ discussion['content'] }} </textarea>
+
+        <p class="alignleft">
+            <form action="/discussion/discussions/view" method="post"> 
+                <input type="hidden" name="redirect_to" value="{{ redirect_to }}" />
+                <!--Modificacion del form para no aplastar el form de votos-->
+                {{ button('bluebg', '/discussion/discussions/answer?discussionid=' + discussion['id']|string +
+                '&redirect_to=/discussion/discussions/view?discussionid=' + discussion['id']|string, 'Crear nueva respuesta') }} 
+            </form>
+            {{ button('redbg', '/discussion/discussions/report?discussionid=' + discussion['id']|string +'&redirect_to=/discussion/discussions/view?discussionid=' + discussion['id']|string, 'Reportar pregunta') }}</p>
+            
+            {%if discussion['answered'] == 1 %}
+                {% for answer in answers %}
+                    <h3><dt>Respuesta</dt></h3>
+                    <textarea name="content" rows="10" cols="100" readonly> {{ answer['content'] }} </textarea>
+                    
+
+                    
+                    <form action="/discussion/discussions/vote_answer" method="post">
+                        <p class="alignleft">
+                            {{submit_button('bluebg','UP')}}  Votos:  {{answer['vote']}}
+                            
+                            
+                            <input type="hidden" name="answerid" value="{{ answer['id'] }}">
+                        </p>
+                    </form>
+                    
+                    
+
+
+                        <p class="alignleft">{{ button('bluebg', '/discussion/discussions/comment?discussionid=' + discussion['id']|string + '&answerid=' + answer['id']|string + 
+                            '&redirect_to=/discussion/discussions/view?discussionid=' + discussion['id']|string, 'Crear nuevo comentario') }} 
+                            
+                            {{ button('redbg', '/discussion/discussions/reportanswer?answerid=' + answer['id']|string + '&discussionid=' + discussion['id']|string + '&redirect_to=/discussion/discussions/view?discussionid=' + discussion['id']|string, 'Reportar respuesta') }}</p>
+                        </p>           
+                    
+                    {%for comment in comments%}
+                        {%if answer['id'] == comment['answerid']%}
+                            <h3><dt>Comentario</dt></h3>
+                            <textarea name="content" rows="10" cols="100" readonly>{{ comment['content'] }}</textarea>
+                            <p class="alignleft">
+
+                                <form action="/discussion/discussions/vote_comment" method="post">
+                                    <p class="alignleft">
+                                        {{submit_button('bluebg','UP')}}  Votos:  {{comment['vote']}}
+                                    
+                                        
+                                        <input type="hidden" name="commentid" value="{{ comment['id'] }}">
+                                    </p>
+                                </form>
+                                
+                                
+                            </p>
+                            
+                            
+                            <p class="alignleft">{{ button('redbg', '/discussion/discussions/reportcomment?answerid=' + answer['id']|string + '&commentid=' + comment['id']|string + '&discussionid=' + discussion['id']|string + 
+                                '&redirect_to=/discussion/discussions/view?discussionid=' + discussion['id']|string, 'Reportar comentario') }}</p>
+                        {%endif%}
+                    {%endfor%}
+                {%endfor%}
+            {%endif%}
+        </p>    
+    </dl> 
+    <p class="alignright">{{ button('redbg', redirect_to, 'Atrás') }}</p>
+
+{% endblock %}

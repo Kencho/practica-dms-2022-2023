@@ -50,3 +50,85 @@ When a request under that security schema receives a request, the key in this he
 This service also has its own API key to integrate itself with the authentication service. This key must be thus whitelisted in the authentication service in order to operate.
 
 As some operations required in the authentication service require a user session, clients using this backend must obtain and keep a valid user session token, that will be passed in the requests to this service to authenticate and authorize them.
+
+
+## Backend
+
+### Arquitectura
+
+Para el desarrollo del Backend se ha implementado el princpio SOLID esto nos permite mantener la separación de las tareas y reducir en cierta medida el número de dependencias, esto se realiza mediante una arquitectura de 4 capas.
+- Capa de datos
+- Capa logica
+- Capa de servicios
+- Capa de presentación
+
+El archivo `openapi/spec.yml` es el utilizado para realizar las llamadas al backend desde el frontend , este archivo especifica las diferentes rutas de acceso al backend mediante sus métodos get, post o put. Cuando se accede a alguna de estas rutas este realiza una llamada al método indicado en la capa de presentación, estas pueden ser mediante get, post o put, estas llamadas son capaces de recibir parámetros mediante un paquete json o bien insertados en la url.
+
+Los ficheros de la capa de presentación se encuentran ubicados en `components/dms2223backend/dms2223backend/presentation/rest/`, donde encontraremos los ficheros que corresponden a `discussion.py` `answer.py` `comment.py` `report.py` y dentro de estos se encuentran los métodos de la capa de presentación, estos son los responsables de llamar a la capa de servicio, después recoger sus datos y de transformarlos para finalmente poder ser utilizados por el frontend, esto requiere devolver los datos obtenidos por capa de servicios y/o el estado HTTP asociado (HTTPStatus.ok, HTTPStatus.BAD_REQUES, HTTPStatus.Forbidden).
+
+Los ficheros la capa de servicios se encuentran en `components/dms2223backend/dms2223backend/service/` donde encontraremos los ficheros que corresponden a `discussionservices.py` `answerservices.py` `commentservices.py` `moderatorservices.py`, en estos encontramos los diferentes métodos llamados por la capa de presentación y son los responsables de: establecer la sesión con la base de datos, también deben llamar a los métodos de la capa lógica y almacenar los resultados obtenidos en listas o diccionarios. Esto permitirá poder realizar las transformaciones necesarias de la capa de servicios a formato JSON de forma más cómoda para que estos ser utilizados finalmente por el frontend.
+
+Los ficheros de la capa lógica se encuentran `components/dms2223backend/dms2223backend/logic/`, donde encontramos los ficheros `answerlogic.py`, `commentlogic.py`, `discussionlogic.py` y `reportlogic.py`, en estos encontramos los métodos llamados de la capa de servicio. Estos métodos se encargan de la comunicación con la capa de datos, también pueden trabajar con estos datos para obtener información más compleja y devolverla a la capa de servicio, esta también se encarga de devolver  los errores y/o excepciones que sucedan en la ejecución.
+
+Finalmente, los ficheros de la capa de datos se encuentran en: `components/dms2223backend/dms2223backend/data/db/`, aquí encontramos la carpeta `results` y la carpeta `resulsets`. Dentro de la carpeta `resultsets` encontramos los ficheros `answers.py`, `comments.py` , `discussion.py` y `report.py` donde se encuentran los métodos que nos permiten modificar/editar estas clases. En la otra carpeta `results` encontramos los ficheros `answer.py`, `comment.py`, `discussion.py` y `report.py` en estos encontramos los métodos de definición de las tablas y el mapeo de las mismas.
+
+## Endpoints del archivo openapi/spec.yml
+
+### Discussions
+`/discussions`:
+-	get: Llama al método list_discussions y devuelve una lista con todas las discusiones
+
+`/discussions/{id}`:
+-	get: Llama al método get_discussion_by_id y devuelve una unica discusión 
+
+`/discussions/{id}/answers`:
+-	get: Llama al método get_answer y devuelve las respuetas de una discusión  
+-	post: Llama al método answer para crear una nueva respuesta a la discusión
+
+`/discussions/{qid}/reports`:
+-	post: Llama al método report para crear un reporte de la discusión
+-
+`/discussions/reports`:
+-	get: Llama al método get_discussion_report y devuelve una lista con las discusiones reportadas 
+ 
+`/discussions/reports/{qrid}`:
+-	put:Llama al método change_report, permite modificar el estado de una discusión reportada
+
+### Answers
+`/answers/{aid}/votes`: 
+-	post: Llama al método vote_answer, realiza un voto en una answer
+
+`/answers/{aid}/comments`:
+-	post:Llama al método comment, permite comentar una answer
+
+`/answers/{aid}/reports`:
+-	post:Llama al método report_answer, para reportar una answer
+
+`/answers/reports`:
+-	get:Llama al método get_aswers_report, devuelve una lista con las answer reportadas
+
+`/answers/reports/{arid}`:
+-	put: Llama al metodo change_report, permite modificar el estado de una answer
+
+### Comments
+`/comments/{cid}/votes`:
+-	post: Llama al método vote_comment, realiza un voto en un comment
+
+`/comments/{cid}/reports`:
+-	post: Llama al método report_comment, para reportar una answer
+
+`/comments/reports`:
+-	get: Llama al método get_aswers_report, devuelva una lista con los comments reportados
+
+`/comments/reports/{crid}`:
+-	put: Llama al metodo change_report, permite modificar el estado de una answer
+
+
+
+
+## Principios SOLID
+Se cumple correctamente el principio SOLID de Single responsability ya que cada clase cumple con su funcion concreta encargandose de un objetivo especifico, como puede ser la separacion de la base de datos de el resto de funcionalidades.
+
+Cumple tambien con el principio SOLID Ope/Closed, como podemos ver las distintas clases pueden extenderse con vista al futuro sin llegar a alterar su codigo.
+
+El principio de Interface segregation tambien se cumple ya que los clientes no estarían en la necesidad de depender de metodos y datos que no utilizaría cumpliendo la granularidad.Para ello hemos diferenciado bien las funcionlidades de unos endpoints de otros.

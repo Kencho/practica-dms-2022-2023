@@ -1,0 +1,34 @@
+{% extends "moderator.html" %}
+{% from "macros/buttons.html" import button, submit_button %}
+{% block contentsubheading %}Vista del moderador{% endblock %}
+{% block moderatorcontent %}
+
+
+<form action="/discussion/discussions/view" method="post">
+    <input type="hidden" name="redirect_to" value="{{ redirect_to }}" />
+    
+    <dl>
+        <h3><dt>{{ discussion['title'] }}</dt></h3>
+        <textarea name="content" rows="10" cols="100"> {{ discussion['content'] }} </textarea>
+        <p class="alignleft">
+            
+            {%if discussion['answered'] == 1 %}
+                {% for answer in answers %}
+                    <h3><dt>Respuesta</dt></h3>
+                    <textarea name="content" rows="10" cols="100" readonly> {{ answer['content'] }} </textarea>
+                              
+                    {%for comment in comments%}
+                        {%if answer['id'] == comment['answerid']%}
+                            <h3><dt>Comentario</dt></h3>
+                            <textarea name="content" rows="10" cols="100" readonly>{{ comment['content'] }}</textarea>
+                            <p class="alignleft"></p>
+                        {%endif%}
+                    {%endfor%}
+                {%endfor%}
+            {%endif%}
+        </p>     
+    </dl> 
+    <p class="alignright">{{ button('redbg', redirect_to, 'Atrás') }}</p>
+</form>
+{% endblock %}
+

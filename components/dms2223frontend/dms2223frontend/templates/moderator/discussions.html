@@ -1,0 +1,25 @@
+{% extends "moderator.html" %}
+{% from "macros/buttons.html" import button, submit_button %}
+{% block title %}{% block subtitle %}{% endblock %}Moderator{% endblock %}
+{% block contentheading %}Moderador ver discusiones{% endblock %}
+{% block moderatorcontent %}
+    
+    <table class="fillwidth highlightrows">
+        <tbody>
+            <tr>
+                <th class="alignleft">Títulos de discusiones</th><th></th>
+            </tr>
+            {% for discussion in discussions %}
+                <tr class="highlightable">
+                    
+                    <td class="alignleft">{{ button('grayBg', '/moderator/discussions/view?discussionid=' + discussion['id']|string
+                        + '&redirect_to=/moderator/discussions', discussion['title']) }}</td>
+                    
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+    
+{% endblock %}
+

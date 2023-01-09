@@ -11,6 +11,7 @@ info:
     although it is highly recommended in actual production scenarios.
 
     Diseño y Mantenimiento del Software.
+
     Grado en Ingeniería Informática, Universidad de Burgos, 2022-2023.
   contact:
     name: Universidad de Burgos
@@ -19,8 +20,8 @@ tags:
     description: Operations regarding the questions and answers.
   - name: moderation
     description: Moderation operations.
-  - name: questions
-    description: Question-related operations.
+  - name: discussions
+    description: Discussion-related operations.
   - name: answers
     description: Answer-related operations.
   - name: comments
@@ -41,13 +42,13 @@ paths:
       description: |
         Use this operation to verify the server is running successfully and the
         API is reachable.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.server.health_test
       responses:
         '204':
           $ref: '#/components/responses/Empty'
       tags:
         - server
-  /questions:
+  /discussions:
     get:
       summary: Gets the existing questions
       description: |
@@ -55,7 +56,7 @@ paths:
 
         Only question stubs are returned. Full information for each question
         should be fetched separately.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.discussion.list_discussions
       responses:
         '200':
           description: A list of questions.
@@ -63,16 +64,8 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/QuestionsListModel'
-              example:
-                - qid: 1
-                  title: 'Recommended size for the work groups?'
-                  timestamp: 1665574089.0
-                - qid: 2
-                  title: 'Separate report or READMEs?'
-                  timestamp: 1665693009.12
       tags:
-        - discussion
-        - questions
+        - discussions
       security:
         - user_token: []
           api_key: []
@@ -83,15 +76,13 @@ paths:
 
         The owner of the question will be automatically retrieved from the
         user token against the authorization server.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.discussion.create_discussion
       requestBody:
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/QuestionCreationModel'
-            example:
-              title: 'Recommended size for the work groups?'
-              body: 'Which is the recommended size for the work groups in your opinion?'
+            
       responses:
         '201':
           description: Question created.
@@ -99,23 +90,24 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/QuestionFullModel'
-              example:
-                qid: 1
-                title: 'Recommended size for the work groups?'
-                body: 'Which is the recommended size for the work groups in your opinion?'
-                owner:
-                  username: 'user1'
-                timestamp: 1665574089.0
+        '400':
+          description: Errors in requests.
+          content:
+            'text/plain':
+              schema:
+                type: string
+
       tags:
-        - discussion
-        - questions
+        - discussions
+    
       security:
         - user_token: []
           api_key: []
-  /questions/{qid}:
+          
+  /discussions/{id}:
     get:
       summary: Gets a single question
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.discussion.get_discussion_by_id
       parameters:
         - $ref: '#/components/parameters/QuestionIdPathParam'
       responses:
@@ -126,7 +118,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/QuestionFullModel'
               example:
-                qid: 1
+                id: 1
                 title: 'Recommended size for the work groups?'
                 body: 'Which is the recommended size for the work groups in your opinion?'
                 owner:
@@ -141,16 +133,16 @@ paths:
               example: 'The question with qid 5 does not exist.'
       tags:
         - discussion
-        - questions
       security:
         - user_token: []
           api_key: []
-  /questions/{qid}/answers:
+  
+  /discussions/{id}/answers:
     get:
       summary: Gets the answers for a question
       description: |
         Fetches the full answers for a given question.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.answer.list_all_for_discussion
       parameters:
         - $ref: '#/components/parameters/QuestionIdPathParam'
       responses:
@@ -233,7 +225,6 @@ paths:
               example: 'The question with qid 5 does not exist.'
       tags:
         - discussion
-        - questions
         - answers
       security:
         - user_token: []
@@ -245,10 +236,11 @@ paths:
 
         The owner of the answer will be automatically retrieved from the
         user token against the authorization server.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.answer.answer
       parameters:
         - $ref: '#/components/parameters/QuestionIdPathParam'
       requestBody:
+        description: Answer data.
         content:
           'application/json':
             schema:
@@ -282,60 +274,12 @@ paths:
               example: 'The question with qid 5 does not exist.'
       tags:
         - discussion
-        - questions
         - answers
       security:
         - user_token: []
           api_key: []
-  /questions/{qid}/reports:
-    post:
-      summary: Reports a question
-      description: |
-        This operation will report a question to be reviewed by a moderator.
 
-        The owner of the report will be automatically retrieved from the
-        user token against the authorization server.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
-      parameters:
-        - $ref: '#/components/parameters/QuestionIdPathParam'
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/QuestionReportCreationModel'
-            example:
-              reason: Promotes hate speech
-      responses:
-        '201':
-          description: The created report.
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/QuestionReportFullModel'
-              example:
-                id: 1
-                qid: 2
-                reason: Promotes hate speech
-                status: PENDING
-                owner:
-                  username: user4
-                timestamp: 1665922785
-        '404':
-          description: The question does not exist.
-          content:
-            'text/plain':
-              schema:
-                type: string
-              example: 'The question with qid 5 does not exist.'
-      tags:
-        - discussion
-        - moderation
-        - questions
-        - reports
-      security:
-        - user_token: []
-          api_key: []
-  /questions/reports:
+  /discussions/reports:
     get:
       summary: Get a list of question reports.
       description: |
@@ -343,7 +287,7 @@ paths:
 
         Several parameters can be used to filter out the reports according to
         their status.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.moderate.list_reports
       parameters:
         - name: pending
           description: |
@@ -405,7 +349,127 @@ paths:
       security:
         - user_token: []
           api_key: []
-  /questions/reports/{qrid}:
+
+  /discussions/{id}/reports:
+    post:
+      summary: Reports a question
+      description: |
+        This operation will report a question to be reviewed by a moderator.
+
+        The owner of the report will be automatically retrieved from the
+        user token against the authorization server.
+      operationId: dms2223backend.presentation.rest.moderate.create_report
+      parameters:
+        - $ref: '#/components/parameters/QuestionIdPathParam'
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/QuestionReportCreationModel'
+            example:
+              reason: Promotes hate speech
+      responses:
+        '201':
+          description: The created report.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/QuestionReportFullModel'
+              example:
+                id: 1
+                qid: 2
+                reason: Promotes hate speech
+                status: PENDING
+                owner:
+                  username: user4
+                timestamp: 1665922785
+        '404':
+          description: The question does not exist.
+          content:
+            'text/plain':
+              schema:
+                type: string
+              example: 'The question with qid 5 does not exist.'
+      tags:
+        - discussion
+        - moderation
+        - questions
+        - reports
+      security:
+        - user_token: []
+          api_key: []
+
+  # /discussions/reports:
+  #   get:
+  #     summary: Get a list of question reports.
+  #     description: |
+  #       This operation gets a listing of question reports.
+
+  #       Several parameters can be used to filter out the reports according to
+  #       their status.
+  #     # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+  #     parameters:
+  #       - name: pending
+  #         description: |
+  #           Set to `false` to exclude the pending reports from the listing.
+  #         in: query
+  #         required: false
+  #         schema:
+  #           type: boolean
+  #           default: true
+  #       - name: accepted
+  #         description: |
+  #           Set to `false` to exclude the accepted reports from the listing.
+  #         in: query
+  #         required: false
+  #         schema:
+  #           type: boolean
+  #           default: true
+  #       - name: rejected
+  #         description: |
+  #           Set to `false` to exclude the rejected reports from the listing.
+  #         in: query
+  #         required: false
+  #         schema:
+  #           type: boolean
+  #           default: true
+  #     responses:
+  #       '200':
+  #         description: Listing of question reports
+  #         content:
+  #           'application/json':
+  #             schema:
+  #               $ref: '#/components/schemas/QuestionReportsListModel'
+  #             example:
+  #               - id: 1
+  #                 qid: 2
+  #                 reason: Promotes hate speech
+  #                 status: ACCEPTED
+  #                 owner:
+  #                   username: user4
+  #                 timestamp: 1665922785
+  #               - id: 2
+  #                 qid: 4
+  #                 reason: Not a question
+  #                 status: REJECTED
+  #                 owner:
+  #                   username: user5
+  #                 timestamp: 1665922785
+  #               - id: 3
+  #                 qid: 4
+  #                 reason: Question is too vague
+  #                 status: PENDING
+  #                 owner:
+  #                   username: user5
+  #                 timestamp: 1665922785
+  #     tags:
+  #       - moderation
+  #       - questions
+  #       - reports
+  #     security:
+  #       - user_token: []
+  #         api_key: []
+  /discussions/reports/{id}:
     put:
       summary: Change the status of a question report
       description: |
@@ -413,7 +477,7 @@ paths:
 
         When a report on a question is accepted, the linked question should be
         hidden so neither the question nor its answers and comments are visible.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.moderate.update_report_status
       parameters:
         - $ref: '#/components/parameters/QuestionReportIdPathParam'
       requestBody:
@@ -440,7 +504,7 @@ paths:
       security:
         - user_token: []
           api_key: []
-  /answers/{aid}/votes:
+  /answers/{id}/votes:
     post:
       summary: Upvote an answer
       description: |
@@ -448,7 +512,7 @@ paths:
 
         The user voting will be automatically retrieved from the user token
         against the authorization server.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.answer.vote_answer
       parameters:
         - $ref: '#/components/parameters/AnswerIdPathParam'
       responses:
@@ -470,15 +534,106 @@ paths:
       security:
         - user_token: []
           api_key: []
-  /answers/{aid}/comments:
+  /answers/{id}/comments:
+    get:
+      summary: Gets the comments for an answer
+      description: |
+        Fetches the full answers for a given question.
+      operationId: dms2223backend.presentation.rest.comment.list_all_for_discussion
+      parameters:
+        - $ref: '#/components/parameters/AnswerIdPathParam'
+      responses:
+        '200':
+          description: The answers for a question.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CommentsListModel'
+              example:
+                - id: 1
+                  qid: 1
+                  timestamp: 1665575089
+                  body: I would suggest four members.
+                  owner:
+                    username: user3
+                  votes: 4
+                  user_votes:
+                    user3: true
+                    user4: true
+                    user5: true
+                    user6: true
+                  comments:
+                    - id: 2
+                      aid: 1
+                      timestamp: 1665575389
+                      body: Evaluation criteria may be relaxed due to the tight number of members
+                      sentiment: POSITIVE
+                      owner:
+                        username: user4
+                      votes: 2
+                      user_votes:
+                        user6: true
+                        user5: true
+                    - id: 1
+                      aid: 1
+                      timestamp: 1665575289
+                      body: Enough to distribute the workload equitatively
+                      sentiment: POSITIVE
+                      owner:
+                        username: user4
+                      votes: 1
+                      user_votes:
+                        user6: true
+                    - id: 3
+                      aid: 1
+                      timestamp: 1665577389
+                      body: The deadline may be too close for the workload and a group this "small"
+                      sentiment: NEGATIVE
+                      owner:
+                        username: user4
+                      votes: 0
+                      user_votes: []
+                - id: 2
+                  qid: 1
+                  timestamp: 1665675089
+                  body: Five members.
+                  owner:
+                    username: user2
+                  votes: 2
+                  user_votes:
+                    user1: true
+                    user2: true
+                  comments:
+                    - id: 4
+                      aid: 2
+                      timestamp: 1665777389
+                      body: The teacher may be stricter if groups are too large
+                      sentiment: NEGATIVE
+                      owner:
+                        username: user4
+                      votes: 0
+                      user_votes: []
+        '404':
+          description: The question does not exist.
+          content:
+            'text/plain':
+              schema:
+                type: string
+              example: 'The question with qid 5 does not exist.'
+      tags:
+        - answer
+        - comments
+      security:
+        - user_token: []
+          api_key: []
+
     post:
       summary: Comments an answer
       description: |
         This operation creates a comment for an existing answer.
-
         The owner of the comment will be automatically retrieved from the user
         token against the authorization server.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.comment.comment
       parameters:
         - $ref: '#/components/parameters/AnswerIdPathParam'
       requestBody:
@@ -520,7 +675,8 @@ paths:
       security:
         - user_token: []
           api_key: []
-  /answers/{aid}/reports:
+
+  /answers/{id}/reports:
     post:
       summary: Reports an answer
       description: |
@@ -528,7 +684,7 @@ paths:
 
         The owner of the report will be automatically retrieved from the
         user token against the authorization server.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.moderate.create_answer_report
       parameters:
         - $ref: '#/components/parameters/AnswerIdPathParam'
       requestBody:
@@ -568,98 +724,99 @@ paths:
       security:
         - user_token: []
           api_key: []
+
   /answers/reports:
-    get:
-      summary: Get a list of answer reports.
-      description: |
-        This operation gets a listing of answer reports.
+      get:
+        summary: Get a list of answer reports.
+        description: |
+          This operation gets a listing of answer reports.
 
-        Several parameters can be used to filter out the reports according to
-        their status.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
-      parameters:
-        - name: pending
-          description: |
-            Set to `false` to exclude the pending reports from the listing.
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: true
-        - name: accepted
-          description: |
-            Set to `false` to exclude the accepted reports from the listing.
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: true
-        - name: rejected
-          description: |
-            Set to `false` to exclude the rejected reports from the listing.
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: true
-      responses:
-        '200':
-          description: Listing of answer reports
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/AnswerReportsListModel'
-              example:
-                - id: 1
-                  aid: 7
-                  reason: Unrelated to the question
-                  status: ACCEPTED
-                  owner:
-                    username: user4
-                  timestamp: 1665922785
-      tags:
-        - moderation
-        - answers
-        - reports
-      security:
-        - user_token: []
-          api_key: []
-  /answers/reports/{arid}:
-    put:
-      summary: Change the status of an answer report
-      description: |
-        Use this operation to change the status of an answer report.
-
-        When a report on an answer is accepted, the linked answer should be
-        hidden so neither the answer nor its comments are visible.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
-      parameters:
-        - $ref: '#/components/parameters/AnswerReportIdPathParam'
-      requestBody:
-        content:
-          'application/json':
+          Several parameters can be used to filter out the reports according to
+          their status.
+        operationId: dms2223backend.presentation.rest.moderate.list_reports_answer
+        parameters:
+          - name: pending
+            description: |
+              Set to `false` to exclude the pending reports from the listing.
+            in: query
+            required: false
             schema:
-              $ref: '#/components/schemas/ReportStatusChangeModel'
-            example:
-              status: REJECTED
-      responses:
-        '204':
-          $ref: '#/components/responses/ReportStatusChanged'
-        '404':
-          description: The answer report does not exist.
-          content:
-            'text/plain':
-              schema:
-                type: string
-              example: 'The answer report with arid 25 does not exist.'
-      tags:
-        - moderation
-        - answers
-        - reports
-      security:
-        - user_token: []
-          api_key: []
-  /comments/{cid}/votes:
+              type: boolean
+              default: true
+          - name: accepted
+            description: |
+              Set to `false` to exclude the accepted reports from the listing.
+            in: query
+            required: false
+            schema:
+              type: boolean
+              default: true
+          - name: rejected
+            description: |
+              Set to `false` to exclude the rejected reports from the listing.
+            in: query
+            required: false
+            schema:
+              type: boolean
+              default: true
+        responses:
+          '200':
+            description: Listing of answer reports
+            content:
+              'application/json':
+                schema:
+                  $ref: '#/components/schemas/AnswerReportsListModel'
+                example:
+                  - id: 1
+                    aid: 7
+                    reason: Unrelated to the question
+                    status: ACCEPTED
+                    owner:
+                      username: user4
+                    timestamp: 1665922785
+        tags:
+          - moderation
+          - answers
+          - reports
+        security:
+          - user_token: []
+            api_key: []
+  # /answers/reports/{arid}:
+  #   put:
+  #     summary: Change the status of an answer report
+  #     description: |
+  #       Use this operation to change the status of an answer report.
+
+  #       When a report on an answer is accepted, the linked answer should be
+  #       hidden so neither the answer nor its comments are visible.
+  #     # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+  #     parameters:
+  #       - $ref: '#/components/parameters/AnswerReportIdPathParam'
+  #     requestBody:
+  #       content:
+  #         'application/json':
+  #           schema:
+  #             $ref: '#/components/schemas/ReportStatusChangeModel'
+  #           example:
+  #             status: REJECTED
+  #     responses:
+  #       '204':
+  #         $ref: '#/components/responses/ReportStatusChanged'
+  #       '404':
+  #         description: The answer report does not exist.
+  #         content:
+  #           'text/plain':
+  #             schema:
+  #               type: string
+  #             example: 'The answer report with arid 25 does not exist.'
+  #     tags:
+  #       - moderation
+  #       - answers
+  #       - reports
+  #     security:
+  #       - user_token: []
+  #         api_key: []
+  /comments/{id}/votes:
     post:
       summary: Upvote a comment
       description: |
@@ -667,7 +824,7 @@ paths:
 
         The user voting will be automatically retrieved from the user token
         against the authorization server.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.comment.vote_comment
       parameters:
         - $ref: '#/components/parameters/CommentIdPathParam'
       responses:
@@ -689,7 +846,8 @@ paths:
       security:
         - user_token: []
           api_key: []
-  /comments/{cid}/reports:
+
+  /comments/{id}/reports:
     post:
       summary: Reports a comment
       description: |
@@ -697,7 +855,7 @@ paths:
 
         The owner of the report will be automatically retrieved from the
         user token against the authorization server.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.moderate.create_comment_report
       parameters:
         - $ref: '#/components/parameters/CommentIdPathParam'
       requestBody:
@@ -737,6 +895,7 @@ paths:
       security:
         - user_token: []
           api_key: []
+
   /comments/reports:
     get:
       summary: Get a list of comment reports.
@@ -745,7 +904,7 @@ paths:
 
         Several parameters can be used to filter out the reports according to
         their status.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
+      operationId: dms2223backend.presentation.rest.moderate.list_reports_comments
       parameters:
         - name: pending
           description: |
@@ -793,84 +952,93 @@ paths:
       security:
         - user_token: []
           api_key: []
-  /comments/reports/{crid}:
-    put:
-      summary: Change the status of a comment report
-      description: |
-        Use this operation to change the status of a comment report.
+  # /comments/reports/{crid}:
+  #     put:
+  #       summary: Change the status of a comment report
+  #       description: |
+  #         Use this operation to change the status of a comment report.
 
-        When a report on a comment is accepted, the linked comment should be
-        hidden so it will not be visible.
-      # operationId: TODO: Set to the fully-qualified name of the function handling the operation
-      parameters:
-        - $ref: '#/components/parameters/CommentReportIdPathParam'
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/ReportStatusChangeModel'
-            example:
-              status: ACCEPTED
-      responses:
-        '204':
-          $ref: '#/components/responses/ReportStatusChanged'
-        '404':
-          description: The comment report does not exist.
-          content:
-            'text/plain':
-              schema:
-                type: string
-              example: 'The comment report with crid 25 does not exist.'
-      tags:
-        - moderation
-        - comments
-        - reports
-      security:
-        - user_token: []
-          api_key: []
+  #         When a report on a comment is accepted, the linked comment should be
+  #         hidden so it will not be visible.
+  #       operationId: TODO: Set to the fully-qualified name of the function handling the operation
+  #       parameters:
+  #         - $ref: '#/components/parameters/CommentReportIdPathParam'
+  #       requestBody:
+  #         content:
+  #           'application/json':
+  #             schema:
+  #               $ref: '#/components/schemas/ReportStatusChangeModel'
+  #             example:
+  #               status: ACCEPTED
+  #       responses:
+  #         '204':
+  #           $ref: '#/components/responses/ReportStatusChanged'
+  #         '404':
+  #           description: The comment report does not exist.
+  #           content:
+  #             'text/plain':
+  #               schema:
+  #                 type: string
+  #               example: 'The comment report with crid 25 does not exist.'
+  #       tags:
+  #         - moderation
+  #         - comments
+  #         - reports
+  #       security:
+  #         - user_token: []
+  #           api_key: []
 components:
   schemas:
     QuestionCoreModel:
       type: object
       properties:
-        qid:
+        id:
           type: integer
         title:
           type: string
-        timestamp:
-          type: number
+        content:
+          type: string
+        answered:
+          type: integer
+      
       required:
-        - qid
+        - id
         - title
-        - timestamp
+        - content
+
     QuestionStubModel:
       allOf:
         - $ref: '#/components/schemas/QuestionCoreModel'
+
     QuestionFullModel:
       allOf:
         - $ref: '#/components/schemas/QuestionCoreModel'
         - type: object
           properties:
-            body:
+            contentSS:
               type: string
             owner:
               $ref: '#/components/schemas/UserCoreModel'
           required:
-            - body
+            - title
+            - content
+
     QuestionCreationModel:
       type: object
       properties:
         title:
           type: string
-        body:
+        content:
           type: string
+          
       required:
         - title
-        - body
+        - content
     QuestionsListModel:
       type: array
       items:
         $ref: '#/components/schemas/QuestionStubModel'
+
     UserCoreModel:
       type: object
       properties:
@@ -878,101 +1046,157 @@ components:
           type: string
       required:
         - username
+    
     AnswerFullModel:
       type: object
       properties:
-        id:
-          type: integer
-        qid:
-          type: integer
-        timestamp:
-          type: number
-        body:
+        #aid:
+        #  type: integer
+        #id:
+        #  type: integer
+        # timestamp:
+        #   type: number
+        content:
           type: string
-        owner:
-          $ref: '#/components/schemas/UserCoreModel'
-        votes:
-          type: integer
-          minimum: 0
-          default: 0
-          nullable: false
-        user_votes:
-          type: object
-          additionalProperties:
-            type: boolean
+        # owner:
+        #   $ref: '#/components/schemas/UserCoreModel'
+        # votes:
+        #   type: integer
+        #   minimum: 0
+        #   default: 0
+        #   nullable: false
+        # user_votes:
+        #   type: object
+        #   additionalProperties:
+        #     type: boolean
+        
         comments:
           $ref: '#/components/schemas/CommentsListModel'
+
+      
       required:
-        - id
-        - qid
-        - timestamp
-        - body
-        - owner
+        #- aid
+        #- id
+        #- timestamp
+        - content
+        #- owner
     AnswerCreationModel:
       type: object
       properties:
-        body:
+        #aid:
+        #  type: integer
+        #id:
+        #  type: integer
+        content:
           type: string
       required:
-        - body
+        #- aid
+        #- id
+        - content
     AnswersListModel:
       type: array
       items:
         $ref: '#/components/schemas/AnswerFullModel'
+    
     CommentFullModel:
       type: object
       properties:
-        id:
-          type: integer
-        aid:
-          type: integer
-        timestamp:
-          type: number
-        body:
-          type: string
-        sentiment:
-          type: string
-          enum:
-            - POSITIVE
-            - NEUTRAL
-            - NEGATIVE
-        owner:
-          $ref: '#/components/schemas/UserCoreModel'
-        votes:
-          type: integer
-          minimum: 0
-          default: 0
-          nullable: false
-        user_votes:
-          type: object
-          additionalProperties:
-            type: boolean
+        content:
+            type: string
+        # id:
+        #   type: integer
+        # aid:
+        #   type: integer
+        # timestamp:
+        #   type: number
+        # body:
+        #   type: string
+        # sentiment:
+        #   type: string
+        #   enum:
+        #     - POSITIVE
+        #     - NEUTRAL
+        #     - NEGATIVE
+        # owner:
+        #   $ref: '#/components/schemas/UserCoreModel'
+        # votes:
+        #   type: integer
+        #   minimum: 0
+        #   default: 0
+        #   nullable: false
+        # user_votes:
+        #   type: object
+        #   additionalProperties:
+        #     type: boolean
+        # content:
+        #     type: string
+        # id:
+        #   type: integer
+        # aid:
+        #   type: integer
+        # timestamp:
+        #   type: number
+        # body:
+        #   type: string
+        # sentiment:
+        #   type: string
+        #   enum:
+        #     - POSITIVE
+        #     - NEUTRAL
+        #     - NEGATIVE
+        # owner:
+        #   $ref: '#/components/schemas/UserCoreModel'
+        # votes:
+        #   type: integer
+        #   minimum: 0
+        #   default: 0
+        #   nullable: false
+        # user_votes:
+        #   type: object
+        #   additionalProperties:
+        #     type: boolean
       required:
-        - id
-        - aid
-        - timestamp
-        - body
-        - sentiment
-        - owner
+        - content
+        # - id
+        # - aid
+        # - timestamp
+        # - content
+        # - sentiment
+        # - owner
+        # - id
+        # - aid
+        # - timestamp
+        # - content
+        # - sentiment
+        # - owner
     CommentCreationModel:
       type: object
       properties:
-        body:
+        content:
           type: string
-        sentiment:
-          type: string
-          enum:
-            - POSITIVE
-            - NEUTRAL
-            - NEGATIVE
-          default: NEUTRAL
+        # sentiment:
+        #   type: string
+        #   enum:
+        #     - POSITIVE
+        #     - NEUTRAL
+        #     - NEGATIVE
+        #   default: NEUTRAL
+        # sentiment:
+        #   type: string
+        #   enum:
+        #     - POSITIVE
+        #     - NEUTRAL
+        #     - NEGATIVE
+        #   default: NEUTRAL
       required:
-        - body
-        - sentiment
+        - content
+        #- sentiment
+        #- sentiment
     CommentsListModel:
       type: array
       items:
         $ref: '#/components/schemas/CommentFullModel'
+    
     QuestionReportFullModel:
       type: object
       properties:
@@ -1010,6 +1234,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/QuestionReportFullModel'
+    
     AnswerReportFullModel:
       type: object
       properties:
@@ -1047,6 +1272,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/AnswerReportFullModel'
+    
     CommentReportFullModel:
       type: object
       properties:
@@ -1084,6 +1310,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/CommentReportFullModel'
+    
     ReportStatusChangeModel:
       type: object
       properties:
@@ -1098,30 +1325,31 @@ components:
     EmptyContentModel:
       type: string
       nullable: true
+  
   parameters:
     QuestionIdPathParam:
-      name: qid
+      name: id
       description: Question identifier.
       in: path
       schema:
         type: integer
       required: true
     AnswerIdPathParam:
-      name: aid
+      name: id
       description: Answer identifier.
       in: path
       schema:
         type: integer
       required: true
     CommentIdPathParam:
-      name: cid
+      name: id
       description: Comment identifier.
       in: path
       schema:
         type: integer
       required: true
     QuestionReportIdPathParam:
-      name: qrid
+      name: id
       description: Question report identifier.
       in: path
       schema:
@@ -1177,17 +1405,19 @@ components:
         JWS token sent in the `Authorization` header as bearer.
 
         Contains, among other things, the user doing the requests.
-
+        
         It is intended to be handed to the authorization service to obtain
         useful information, rather than trying to decode it in the backend.
       type: http
       scheme: bearer
       bearerFormat: JWT
-      # x-bearerInfoFunc: TODO: Set to the fully-qualified name of the function handling the verification
+      x-bearerInfoFunc: dms2223backend.presentation.rest.security.verify_token
+      #x-bearerInfoFunc: dms2223auth.presentation.rest.security.verify_token
     api_key:
       description: |
         Secret shared between both the requestor and the service.
       type: apiKey
-      name: X-ApiKey-Auth
+      name: X-ApiKey-Backend
       in: header
-      # x-apikeyInfoFunc: TODO: Set to the fully-qualified name of the function handling the verification
+      x-apikeyInfoFunc: dms2223backend.presentation.rest.security.verify_api_key
+

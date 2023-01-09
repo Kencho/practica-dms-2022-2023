@@ -1,8 +1,56 @@
 #!/usr/bin/env python3
 
-import time
+from flask import Flask
+import inspect
+import os
+import logging
+import connexion
+from typing import Dict
+from connexion.apps.flask_app import FlaskJSONEncoder
+from flask import current_app
+from flask.logging import default_handler
+import dms2223backend
+from dms2223backend.data.config import BackendConfiguration
+from dms2223backend.data.rest import AuthService
+from dms2223backend.data.db import Schema
 
-print("This file is a stub. Replace this behaviour with the actual service code.")
 
-while True:
-    time.sleep(1)
+if __name__ == '__main__':
+    cfg: BackendConfiguration = BackendConfiguration()
+    cfg.load_from_file(cfg.default_config_file())
+    db: Schema = Schema(cfg)
+
+    specification_dir = os.path.dirname(
+        inspect.getfile(dms2223backend)) + '/openapi'
+    app = connexion.FlaskApp(
+        __name__,
+        specification_dir=specification_dir,
+        options={
+            "swagger_ui": True,
+            "serve_spec": True
+        }
+    )
+
+    auth_service_cfg: Dict = cfg.get_auth_service()
+    auth_service: AuthService = AuthService(
+        auth_service_cfg['host'], auth_service_cfg['port'],
+        apikey_header='X-ApiKey-Backend',
+        apikey_secret=auth_service_cfg['apikey_secret']
+    )
+
+    app.add_api("spec.yml", strict_validation=True)
+    flask_app = app.app
+    with flask_app.app_context():
+        current_app.db = db
+        current_app.cfg = cfg
+        current_app.authservice = auth_service
+
+    root_logger = logging.getLogger()
+    root_logger.addHandler(default_handler)
+
+    app.run(
+        host=cfg.get_service_host(),
+        port=cfg.get_service_port(),
+        debug=cfg.get_debug_flag(),
+        use_reloader=False
+    )

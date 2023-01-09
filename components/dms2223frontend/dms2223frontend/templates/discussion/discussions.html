@@ -1,0 +1,23 @@
+{% extends "discussion.html" %}
+{% from "macros/buttons.html" import button, submit_button %}
+{% block title %}{% block subtitle %}{% endblock %}Discussion{% endblock %}
+{% block contentheading %}Gestión de Discusiones{% endblock %}
+{% block discussioncontent %}
+    <table class="fillwidth highlightrows">
+        <tbody>
+            <tr>
+                <th class="alignleft">Títulos de discusiones</th><th></th>
+            </tr>
+            {% for discussion in discussions %}
+                <tr class="highlightable">
+                    
+                    <td class="alignleft">{{ button('grayBg', '/discussion/discussions/view?discussionid=' + discussion['id']|string
+                        + '&redirect_to=/discussion/discussions', discussion['title']) }}</td>
+                    
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+    <p class="alignright">{{ button('bluebg', '/discussion/discussions/new', 'Crear nueva discusión') }}</p>
+{% endblock %}

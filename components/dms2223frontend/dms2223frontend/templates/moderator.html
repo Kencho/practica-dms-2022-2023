@@ -1,8 +1,11 @@
 {% extends "base_logged_in.html" %}
 {% block title %}{% block subtitle %}{% endblock %}Moderator{% endblock %}
-{% block contentheading %}Moderators panel{% endblock %}
+{% block contentheading %}Panel de moderadores{% endblock %}
 {% block maincontent %}
     {% block moderatorcontent %}
-    <p class="yellowbg">Under construction</p>
+    <dl>
+        <dt><a href="/moderator/reports">Informes</a></dt>
+        <dt><a href="/moderator/discussions">Discusiones</a></dt>
+    </dl>
     {% endblock %}
 {% endblock %}

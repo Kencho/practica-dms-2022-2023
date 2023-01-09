@@ -1,0 +1,22 @@
+{% extends "discussion.html" %}
+{% from "macros/buttons.html" import button, submit_button %}
+{% block contentsubheading %}Crear nuevo reporte{% endblock %}
+{% block discussioncontent %}
+    <form action="/discussion/discussions/report" method="post">
+        <input type="hidden" name="redirect_to" value="{{ redirect_to }}" />
+        <input type="hidden" name="discussionid" value="{{ discussionid }}" />
+
+        <dl>
+            
+       
+		<dt><p>Cuentanos que sucede</p></dt>
+            <dd>
+                <textarea name="reason" rows="15" cols="100"></textarea>
+                <var name="tiporeport" value="1">1</var>
+            </dd>
+            
+            
+        </dl>
+        <p class="alignright">{{ submit_button('bluebg', 'Enviar reporte') }}{{ button('redbg', redirect_to, 'Cancel') }}</p>
+    </form>
+{% endblock %}

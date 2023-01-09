@@ -1,0 +1,22 @@
+{% extends "moderator.html" %}
+{% from "macros/buttons.html" import button, submit_button %}
+{% block contentsubheading %}Vista del moderador{% endblock %}
+{% block moderatorcontent %}
+
+
+    
+    <dl>
+        <dt> <h2>{{title}}</h2></dt> <h6>@Usuario 16/11/2022 10:30</h6>
+        
+        <textarea name="content" rows="10" cols="100" readonly> Contenido del reporte leído </textarea>
+        
+    </dl>
+    
+    <p class="alignleft">{{ button('bluebg', '/moderator/moderator/resolution?reporttitle=' + title + '&redirect_to=/moderator/moderator/resolution?reporttitle=' + title, 'Aceptar reporte') }}
+                         {{ button('redbg', '/moderator/reports?reporttitle=' + title + '&redirect_to=/moderator/moderator/resolution?reporttitle=' + title, 'Rechazar reporte') }}</p>
+
+    <p class="alignright">{{ button('redbg', '/moderator/reports?reporttitle=' + title + '&redirect_to=/moderator/moderator/resolution?reporttitle=' + title, 'Cancelar') }}</p>
+
+
+   
+{% endblock %}

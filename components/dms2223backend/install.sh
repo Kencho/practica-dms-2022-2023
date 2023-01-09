@@ -9,3 +9,6 @@ pip3 install .
 popd
 
 rm -R "${TEMP_DIR}"
+
+#Create test discussions 
+dms2223backend-create-discussions
